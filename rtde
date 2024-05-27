@@ -1,0 +1,122 @@
+  # 页面访问次数排名
+    html.Div(
+        style={'margin-bottom':'150px'},
+        children=[
+            html.Div(
+                style={'border-top-style':'solid', 'border-bottom-style':'solid'},
+                className='row',
+                children=[
+                    html.Span(
+                        children='页面访问次数排名, ',
+                        style={'font-weight': 'bold', 'color':'red'}
+                    ),
+
+                    html.Span(
+                        children='显示个数:',
+                    ),
+                    dcc.Input(
+                        id='input_website_count_rank',
+                        type='text',
+                        value=10,
+                        style={'margin-top':'10px', 'margin-bottom':'10px'}
+                    ),
+                ]
+            ),
+
+
+            html.Div(
+                style={'position': 'relative', 'margin': '0 auto', 'width': '100%', 'padding-bottom': '50%', },
+                children=[
+                    dcc.Loading(
+                        children=[
+                            dcc.Graph(
+                                id='graph_website_count_rank',
+                                style={'position': 'absolute', 'width': '100%', 'height': '100%', 'top': '0',
+                                       'left': '0', 'bottom': '0', 'right': '0'},
+                                config={'displayModeBar': False},
+                            ),
+                        ],
+                        type='dot',
+                        style={'position': 'absolute', 'top': '50%', 'left': '50%', 'transform': 'translate(-50%,-50%)'}
+                    ),
+                ],
+            )
+        ]
+    ),
+
+
+    # 页面访问停留总时间排名
+    html.Div(
+        style={'margin-bottom': '150px'},
+        children=[
+            html.Div(
+                style={'border-top-style': 'solid', 'border-bottom-style': 'solid'},
+                className='row',
+                children=[
+                    html.Span(
+                        children='页面访问停留总时间排名',
+                        style={'font-weight': 'bold', 'color': 'red'}
+                    )
+                ]
+            ),
+
+            html.Div(
+                style={"overflowY": "scroll"},
+                children=[
+                    dash_table.DataTable(
+                        id='table_url_time_rank',
+                        columns=[
+                            {'name': '编号', 'id': 'id'},
+                            {'name': '停留时间', 'id': 'count', 'type': 'numeric', 'format': Format(nully='N/A', precision=2, scheme=Scheme.decimal, sign=Sign.parantheses, symbol=Symbol.yes, symbol_suffix=u'小时')},
+                            {'name': '网页地址', 'id': 'url'},
+                            {'name': '网页标题', 'id': 'title'}
+
+                        ],
+                        data=[
+                            {'id': '0', 'url': '初始化', 'title': '初始化', 'count': '初始化'}
+                        ],
+                        style_header={
+                            'fontWeight': 'bold',
+                            'backgroundColor': 'white',
+                            'borderBottom': '1px solid black',
+                        },
+                        style_cell={
+                            'textAlign': 'left',
+                            'fontSize': '15px',
+                            'border': '1px solid grey'
+                        },
+                        style_table={
+                            'minHeight': '1px',
+                            'maxHeight': '400px',
+                        },
+                        style_data_conditional=[
+                            {
+                                'if': {'row_index': 'odd'},
+                                'backgroundColor': 'rgb(248, 248, 248)'
+                            }
+                        ]
+
+                    )
+                ],
+            )
+        ]
+    ),
+
+
+
+
+
+    # 每日页面访问次数散点图
+    html.Div(
+        style={'margin-bottom':'150px'},
+        children=[
+            html.Div(
+                style={'border-top-style': 'solid', 'border-bottom-style': 'solid'},
+                className='row',
+                children=[
+                    html.Span(
+                        children='每日页面访问次数',
+                        style={'font-weight': 'bold', 'color': 'red'}
+                    )
+                ]
+            ),
