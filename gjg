@@ -1,0 +1,160 @@
+/**
+   * A dep is an observable that can have multiple
+   * directives subscribing to it.
+   */
+  var Dep = function Dep () {
+    this.id = uid++;
+    this.subs = [];
+  };
+
+  Dep.prototype.addSub = function addSub (sub) {
+    this.subs.push(sub);
+  };
+
+  Dep.prototype.removeSub = function removeSub (sub) {
+    remove(this.subs, sub);
+  };
+
+  Dep.prototype.depend = function depend () {
+    if (Dep.target) {
+      Dep.target.addDep(this);
+    }
+  };
+
+  Dep.prototype.notify = function notify () {
+    // stabilize the subscriber list first
+    var subs = this.subs.slice();
+    if (!config.async) {
+      // subs aren't sorted in scheduler if not running async
+      // we need to sort them now to make sure they fire in correct
+      // order
+      subs.sort(function (a, b) { return a.id - b.id; });
+    }
+    for (var i = 0, l = subs.length; i < l; i++) {
+      subs[i].update();
+    }
+  };
+
+  // The current target watcher being evaluated.
+  // This is globally unique because only one watcher
+  // can be evaluated at a time.
+  Dep.target = null;
+  var targetStack = [];
+
+  function pushTarget (target) {
+    targetStack.push(target);
+    Dep.target = target;
+  }
+
+  function popTarget () {
+    targetStack.pop();
+    Dep.target = targetStack[targetStack.length - 1];
+  }
+
+  /*  */
+
+  var VNode = function VNode (
+    tag,
+    data,
+    children,
+    text,
+    elm,
+    context,
+    componentOptions,
+    asyncFactory
+  ) {
+    this.tag = tag;
+    this.data = data;
+    this.children = children;
+    this.text = text;
+    this.elm = elm;
+    this.ns = undefined;
+    this.context = context;
+    this.fnContext = undefined;
+    this.fnOptions = undefined;
+    this.fnScopeId = undefined;
+    this.key = data && data.key;
+    this.componentOptions = componentOptions;
+    this.componentInstance = undefined;
+    this.parent = undefined;
+    this.raw = false;
+    this.isStatic = false;
+    this.isRootInsert = true;
+    this.isComment = false;
+    this.isCloned = false;
+    this.isOnce = false;
+    this.asyncFactory = asyncFactory;
+    this.asyncMeta = undefined;
+    this.isAsyncPlaceholder = false;
+  };
+
+  var prototypeAccessors = { child: { configurable: true } };
+
+  // DEPRECATED: alias for componentInstance for backwards compat.
+  /* istanbul ignore next */
+  prototypeAccessors.child.get = function () {
+    return this.componentInstance
+  };
+
+  Object.defineProperties( VNode.prototype, prototypeAccessors );
+
+  var createEmptyVNode = function (text) {
+    if ( text === void 0 ) text = '';
+
+    var node = new VNode();
+    node.text = text;
+    node.isComment = true;
+    return node
+  };
+
+  function createTextVNode (val) {
+    return new VNode(undefined, undefined, undefined, String(val))
+  }
+
+  // optimized shallow clone
+  // used for static nodes and slot nodes because they may be reused across
+  // multiple renders, cloning them avoids errors when DOM manipulations rely
+  // on their elm reference.
+  function cloneVNode (vnode) {
+    var cloned = new VNode(
+      vnode.tag,
+      vnode.data,
+      // #7975
+      // clone children array to avoid mutating original in case of cloning
+      // a child.
+      vnode.children && vnode.children.slice(),
+      vnode.text,
+      vnode.elm,
+      vnode.context,
+      vnode.componentOptions,
+      vnode.asyncFactory
+    );
+    cloned.ns = vnode.ns;
+    cloned.isStatic = vnode.isStatic;
+    cloned.key = vnode.key;
+    cloned.isComment = vnode.isComment;
+    cloned.fnContext = vnode.fnContext;
+    cloned.fnOptions = vnode.fnOptions;
+    cloned.fnScopeId = vnode.fnScopeId;
+    cloned.asyncMeta = vnode.asyncMeta;
+    cloned.isCloned = true;
+    return cloned
+  }
+
+  /*
+   * not type checking this file because flow doesn't play well with
+   * dynamically accessing methods on Array prototype
+   */
+
+  var arrayProto = Array.prototype;
+  var arrayMethods = Object.create(arrayProto);
+
+  var methodsToPatch = [
+    'push',
+    'pop',
+    'shift',
+    'unshift',
+    'splice',
+    'sort',
+    'reverse'
+  ];
