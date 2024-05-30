@@ -1,0 +1,22 @@
+import asyncio
+from playwright.async_api import async_playwright
+
+async def main():
+    async with async_playwright() as playwright:
+        browser = await playwright.chromium.launch(headless=True)
+        page = await browser.new_page()
+		# 注入stealth.min.js脚本
+        await page.add_init_script(path="stealth.min.js")
+        url = "" # 请求api
+        data = "" # 请求参数
+
+        # 执行JavaScript
+        encrypt_params = await page.evaluate('([url, data]) => window._webmsxyw(url, data)', [url, data])
+        local_storage = await page.evaluate('() => window.localStorage')
+
+        print(encrypt_params)
+        print(local_storage)
+
+        await browser.close()
+        
+asyncio.run(main())
