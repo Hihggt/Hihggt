@@ -1,0 +1,16 @@
+void WelcomeToGame() {
+	SetPos(36,13);
+	printf("欢迎来到星纭的贪吃蛇小游戏");
+	SetPos(40,25);
+	system("pause");
+	system("cls");
+	SetPos(15,10);
+	printf("游戏规则介绍：");
+	SetPos(24,13);
+	wprintf(L"用 ↑. ↓ . ← . → 来控制蛇的移动，按F3加速，F4减速\n");
+	SetPos(36,16);
+	printf("加速可以获得更更高的分数");
+	SetPos(40,25);
+	system("pause");
+	system("cls");
+}
