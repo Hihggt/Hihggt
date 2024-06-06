@@ -1,0 +1,209 @@
+ 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.http.ContentType;
+import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.sign.Base64;
+import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.ruoyils.exception.MyException;
+import com.ruoyi.ruoyils.sy.append.domain.LsAppend;
+import com.ruoyi.ruoyils.sy.append.mapper.LsAppendMapper;
+import com.ruoyi.ruoyils.sy.order.domain.LsOrder;
+import com.ruoyi.ruoyils.sy.order.mapper.LsOrderMapper;
+import com.ruoyi.ruoyils.sy.order.service.impl.LsOrderServiceImpl;
+import com.ruoyi.ruoyils.sy.product.domain.LsProduct;
+import com.ruoyi.ruoyils.sy.product.mapper.LsProductMapper;
+import com.ruoyi.ruoyils.utils.*;
+import com.ruoyi.ruoyils.wx.pay.service.IWxPayService;
+import com.ruoyi.ruoyils.wx.user.domain.LsUser;
+import com.ruoyi.ruoyils.wx.user.mapper.LsUserMapper;
+import com.wechat.pay.contrib.apache.httpclient.auth.Verifier;
+import com.wechat.pay.contrib.apache.httpclient.notification.Notification;
+import com.wechat.pay.contrib.apache.httpclient.notification.NotificationHandler;
+import com.wechat.pay.contrib.apache.httpclient.notification.NotificationRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+ 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.Signature;
+import java.util.*;
+ 
+@Order(5)
+@Slf4j
+@Service
+public class WxPayServiceImpl implements IWxPayService {
+ 
+    @Autowired
+    private LsOrderMapper orderMapper;
+    @Autowired
+    private LsUserMapper lsUserMapper;
+    @Autowired
+    private LsProductMapper lsProductMapper;
+    @Autowired
+    private LsAppendMapper lsAppendMapper;
+ 
+ 
+    /**
+     * 立即下单
+     *
+     * @param lsOrder 订单
+     * @return 结果
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public AjaxResult addOrder(LsOrder lsOrder) {
+ 
+            // TODO 订单业务操作
+ 
+            // 生成订单
+            int i = orderMapper.insertLsOrder(lsOrder);
+            if (i > 0) {
+                // 调起支付
+                AjaxResult payment = this.payment(lsOrder);
+                return payment;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return AjaxResult.error("下单失败 !");
+    }
+ 
+ 
+    /**
+     * 调起支付
+     *
+     * @param lsOrder
+     * @return
+     */
+    @Override
+    public AjaxResult payment(LsOrder lsOrder) {
+        try {
+            JSONObject order = new JSONObject();
+            // 应用ID
+            order.put("appid",WxPayUtils.appId);
+            // 商户号
+            order.put("mchid",WxPayUtils.mchId);
+            // 商品描述
+            order.put("description",lsOrder.getProductName());
+            // 订单号
+            order.put("out_trade_no",lsOrder.getOrderNo());
+            // 通知地址
+            order.put("notify_url",ConstantUtils.NOTIFY_URL+"/ls/wx/pay/notifyUrl");
+            /**订单金额*/
+            JSONObject amount = new JSONObject();
+            // 总金额 (默认单位分)
+//            amount.put("total",lsOrder.getTotalPrice().intValue()*100);
+            amount.put("total",1);
+            // 货币类型
+            amount.put("currency","CNY");
+            order.put("amount",amount);
+ 
+            /**支付者*/
+            JSONObject payer = new JSONObject();
+            LsUser user = SpringUtils.getBean(LsUserMapper.class).selectLsUserById(lsOrder.getUserId());
+            // 用户标识
+            payer.put("openid",user.getOpenid());
+            order.put("payer",payer);
+ 
+          	// TODO
+	        return null;
+		  
+    }
+ 
+    /**
+     * 支付通知
+     *
+     * @param servletRequest
+     * @param response
+     * @return
+     */
+    @Override
+    public AjaxResult notifyUrl(HttpServletRequest servletRequest, HttpServletResponse response) {
+        log.info("----------->微信支付回调开始<-----------");
+        Map<String, String> map = new HashMap<>(12);
+        String timeStamp = servletRequest.getHeader("Wechatpay-Timestamp");
+        String nonce = servletRequest.getHeader("Wechatpay-Nonce");
+        String signature = servletRequest.getHeader("Wechatpay-Signature");
+        String certSn = servletRequest.getHeader("Wechatpay-Serial");
+       
+	   // TODO
+	   return null;
+    }
+ 
+    /**
+     * 关闭订单
+     *
+     * @param orderNo
+     * @return
+     */
+    public boolean closePayOrder(String orderNo) {
+        JSONObject obj = new JSONObject();
+        // 直连商户号
+        obj.put("mchid", WxPayUtils.mchId);
+        // 请求地址
+        String closeOrderUrl = ConstantUtils.CLOSE_PAY_ORDER_URL.replace("{out_trade_no}", orderNo);
+ 
+        HttpPost httpPost = new HttpPost(closeOrderUrl);
+        httpPost.addHeader("Accept", "application/json");
+        httpPost.addHeader("Content-type", "application/json; charset=utf-8");
+        httpPost.setEntity(new StringEntity(obj.toJSONString(), "UTF-8"));
+ 
+        // 微信httpClient
+        CloseableHttpClient httpClient = WechatPayaHttpclientUtils.httpClient;
+        try {
+            if(httpClient == null){
+                log.info("关闭订单失败，请重试,无法连接微信支付服务器!");
+            }
+            //执行请求
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+            //状态码
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == 204) {
+                //关闭订单成功!
+                log.info("微信关闭订单成功: {}", orderNo);
+            }else if(statusCode == 202){
+                //用户支付中，需要输入密码
+                log.info("关闭微信订单--用户支付中，需要输入密码,暂时不做处理!");
+            }else{
+                log.info("关闭微信订单--关闭支付订单失败，出现未知原因: {}", EntityUtils.toString(response.getEntity()));
+            }
+        } catch (IOException e) {
+            log.info("关闭微信订单--关闭订单失败: {}", e.getMessage());
+        }
+        return false;
+    }
+ 
+    /**
+     * 订单查询 (定时查询订单, 修改订单状态)
+     *
+     * @return
+     */
+    @Scheduled(cron="0/10 * * * * ?")
+    public void queryOrder() {
+ 
+		// TODO
+    }
+}
