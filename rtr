@@ -1,0 +1,27 @@
+ body, canvas, div {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -khtml-user-select: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+    .page-footer {
+    	  position: fixed;
+    	  right: 0px;
+    	  bottom: 0px;
+    	  display: flex;
+    	  align-items: center;
+    	  padding: 5px;
+    	  color: black;
+    	  background: rgba(255, 255, 255, 0.65);
+    	}
+    	.page-left {
+    	  position: fixed;
+    	  left: 0px;
+    	  bottom: 0px;
+    	  display: flex;
+    	  align-items: center;
+    	  padding: 5px;
+    	  color: black;
+    	  background: rgba(255, 255, 255, 0.65);
+    	}
