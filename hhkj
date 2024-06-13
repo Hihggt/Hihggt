@@ -1,0 +1,55 @@
+<div class="title"><a href="lianxi.html"><h1>联系我们</h1><span>更多&gt;&gt;</span></a></div>
+<div class="left-box left-box2">
+<ul>
+<li><h2>工作时间：周一到周五9:00-17：00</h2></li>
+<li><h2>联系地址：视觉传达1601班级</h2></li>
+<li><h2>联系电话：400-8888888</h2></li>
+<li><h2>宣传合作：400-888-6666-33</h2></li>
+</ul>
+</div>
+</div>
+
+
+<div class="right">
+<div class="box1">
+<div class="wen">
+<a href="about.html"><h1>关于我们</h1></a>
+<p>南京师范大学泰州学院是一所于2004年6月经国家教育部批准成立的普通高校本科层次独立学院，由南京师范大学和泰州高教投资发展有限公司共同组建。</P>
+<p>经过14年的办学实践与探索，学院形成了适应地方经济与社会发展需要、具有自身特色的发展思路和运行机制，为事业更好更快发展奠定了坚实基础。</P>
+</div>
+<img src="images/ri01.jpg" />
+</div>
+<div class="box2">
+<img src="images/ri02.jpg" />
+<div class="wen">
+<a href="sheji.html"><h1>设计项目</h1></a>
+<p>视觉传达设计是指依据特定的设计目的，对信息进行分析、归纳并通过文字、图形、色彩、造型等基本要素进行设计创作，是将可视化信息传达给受众并对受众产生影响的过程。</P>
+<p>在新精神、新艺术、新工具、新空间、新媒体空前发展的情形下，能够展现出神奇的风貌，满足各方面的需求。</P>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<!-----main结束------->
+<!-----bottom开始------->
+<div class="bottom">
+<div class=" daoh">
+2000-2019 @版权所有 视觉传达1601班级 . 07160125 鲍闻 
+</div>
+<img src="images/logo.jpg" />
+</div>
+
+<!-----bottom结束------->
+<script>
+    /**
+     *
+     * @param id  传入元素的id
+     * @returns {HTMLElement | null}  返回标签对象，方便获取元素
+     */
+    function my$(id) {
+        return document.getElementById(id);
+    }
+ 
+   
