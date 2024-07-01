@@ -1,0 +1,8 @@
+def check_value(value):
+    if value is None:
+        print("Value is None")
+    else:
+        print("Value is not None")
+ 
+check_value(None)  # 输出：Value is None
+check_value(0)  # 输出：Value is not None
